@@ -38,3 +38,4 @@ captures/
 !.env.example
 *.jks
 *.keystore
+/backend/data/
