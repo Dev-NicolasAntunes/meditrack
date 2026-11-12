@@ -11,6 +11,8 @@ public record HistoryStats(
         int tomado,
         int atrasado,
         int adiado,
-        int naoTomado
+        int naoTomado,
+        /** Doses previstas sem nenhum registro: previstas − (tomado + atrasado + adiado + não tomado), mínimo 0. */
+        int semResposta
 ) {
 }

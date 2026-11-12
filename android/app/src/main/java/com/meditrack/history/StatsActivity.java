@@ -2,6 +2,7 @@
 package com.meditrack.history;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.ViewGroup;
@@ -18,6 +19,8 @@ public class StatsActivity extends Activity {
     public static final String EXTRA_PERIOD = "com.meditrack.history.PERIOD";
     /** Data (AAAA-MM-DD) dentro do período a exibir; sem ela, mostra o período atual. */
     public static final String EXTRA_REFERENCE = "com.meditrack.history.REFERENCE";
+
+    private static final int NO_RESPONSE_COLOR = Color.rgb(110, 122, 132);
 
     private final HistoryRepository repository = new HistoryRepository();
     private HistoryPeriod period;
@@ -109,17 +112,26 @@ public class StatsActivity extends Activity {
         addCount(DoseStatus.ATRASADO, stats.atrasado);
         addCount(DoseStatus.ADIADO, stats.adiado);
         addCount(DoseStatus.NAO_TOMADO, stats.naoTomado);
+        addCount("Sem resposta", NO_RESPONSE_COLOR, stats.semResposta);
 
         TextView note = MedicationUi.body(this, "Doses previstas incluem os horários cadastrados até agora "
-                + "e as doses registradas fora deles. Doses adiadas e depois tomadas contam como tomadas.");
+                + "e as doses registradas fora deles. Doses adiadas e depois tomadas contam como tomadas. "
+                + "\"Sem resposta\" são doses previstas sem nenhum registro.");
         note.setTextSize(13);
         content.addView(note, MedicationUi.fullWidth(this, 16));
     }
 
     private void addCount(DoseStatus status, int count) {
+        addCount(status.getLabel(), status.getColor(), count);
+    }
+
+    private void addCount(String text, int color, int count) {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
-        TextView label = HistoryUi.statusLabel(this, status);
+        TextView label = MedicationUi.body(this, text);
+        label.setTextColor(color);
+        label.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        label.setTextSize(14);
         row.addView(label, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
         TextView value = MedicationUi.body(this, String.valueOf(count));
         value.setTypeface(Typeface.DEFAULT, Typeface.BOLD);

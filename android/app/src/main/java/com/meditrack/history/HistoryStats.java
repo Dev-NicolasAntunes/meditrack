@@ -14,6 +14,7 @@ public class HistoryStats {
     public final int atrasado;
     public final int adiado;
     public final int naoTomado;
+    public final int semResposta;
 
     private HistoryStats(JSONObject json) throws JSONException {
         startDate = json.getString("startDate");
@@ -25,6 +26,9 @@ public class HistoryStats {
         atrasado = json.getInt("atrasado");
         adiado = json.getInt("adiado");
         naoTomado = json.getInt("naoTomado");
+        // Backend antigo não envia o campo: calcula aqui com a mesma regra.
+        semResposta = json.has("semResposta") ? json.getInt("semResposta")
+                : Math.max(0, expectedDoses - (tomado + atrasado + adiado + naoTomado));
     }
 
     public static HistoryStats fromJson(JSONObject json) throws JSONException {

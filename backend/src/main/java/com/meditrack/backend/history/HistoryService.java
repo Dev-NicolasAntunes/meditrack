@@ -108,9 +108,12 @@ public class HistoryService {
         int expectedCount = expected.size();
         int adherence = expectedCount == 0 ? 0
                 : (int) Math.min(100, Math.round(taken * 100.0 / expectedCount));
+        // Cada registro é único por (medicamento, horário previsto) e entra no conjunto de previstas,
+        // então a diferença já é >= 0; o max só protege contra mudanças futuras nessa regra.
+        int semResposta = Math.max(0, expectedCount - (tomado + atrasado + adiado + naoTomado));
         return new HistoryStats(range.period(), range.start().toLocalDate().toString(),
                 range.endExclusive().toLocalDate().minusDays(1).toString(),
-                expectedCount, taken, adherence, tomado, atrasado, adiado, naoTomado);
+                expectedCount, taken, adherence, tomado, atrasado, adiado, naoTomado, semResposta);
     }
 
     private void addScheduledDoses(Set<String> expected, Medication medication,
