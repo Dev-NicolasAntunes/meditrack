@@ -173,12 +173,18 @@ public class MedicationDetailsActivity extends Activity {
                 .setTitle("Confirmar dose")
                 .setMessage("Confirma que utilizou uma dose? Uma unidade será descontada do estoque.")
                 .setNegativeButton("Cancelar", null)
-                .setPositiveButton("Confirmar", (dialog, which) ->
-                        repository.confirmDose(medicationId, new MedicationRepository.Callback<Medication>() {
+                .setPositiveButton("Confirmar", (dialog, which) -> {
+                        // Integrante 2: a dose passa pelo histórico (POST /api/history), que desconta o estoque.
+                        String now = com.meditrack.history.DoseTimes.format(com.meditrack.history.DoseTimes.now());
+                        new com.meditrack.history.HistoryRepository().record(medicationId, now, now,
+                                com.meditrack.history.DoseStatus.TOMADO,
+                                new MedicationRepository.Callback<com.meditrack.history.DoseRecordResult>() {
                             @Override
-                            public void onSuccess(Medication medication) {
-                                MedicationUi.toast(MedicationDetailsActivity.this,
-                                        medication.isLowStock() ? "Dose registrada. Estoque baixo."
+                            public void onSuccess(com.meditrack.history.DoseRecordResult result) {
+                                Medication medication = result.medication;
+                                MedicationUi.toast(MedicationDetailsActivity.this, result.duplicate
+                                        ? "Uma dose já foi registrada neste minuto."
+                                        : medication.isLowStock() ? "Dose registrada. Estoque baixo."
                                                 : "Dose registrada e estoque atualizado.");
                                 render(medication);
                             }
@@ -187,7 +193,8 @@ public class MedicationDetailsActivity extends Activity {
                             public void onError(String message) {
                                 showError(message);
                             }
-                        }))
+                        });
+                })
                 .show();
     }
 
@@ -200,6 +207,7 @@ public class MedicationDetailsActivity extends Activity {
                         repository.delete(medicationId, new MedicationRepository.Callback<Void>() {
                             @Override
                             public void onSuccess(Void result) {
+                                com.meditrack.reminder.ReminderManager.cancel(MedicationDetailsActivity.this, medicationId);
                                 setResult(RESULT_OK);
                                 finish();
                             }

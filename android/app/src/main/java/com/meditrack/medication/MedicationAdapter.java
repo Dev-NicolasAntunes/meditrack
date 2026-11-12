@@ -90,8 +90,9 @@ public class MedicationAdapter extends BaseAdapter {
         deleteParams.leftMargin = dp(8);
         actionsRow.addView(delete, deleteParams);
         delete.setOnClickListener(view -> actions.onDelete(medication));
-        card.setFocusable(true);
-        card.setClickable(true);
+        edit.setFocusable(false);
+        delete.setFocusable(false);
+        card.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         return card;
     }
 
