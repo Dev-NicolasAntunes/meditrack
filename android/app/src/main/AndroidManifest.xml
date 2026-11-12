@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Integrante 2: lembretes e notificações -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -15,11 +19,44 @@
             android:exported="false" />
         <activity
             android:name=".medication.MedicationActivity"
+            android:exported="false" />
+
+        <!-- Integrante 2: a tela inicial passa a ser "Hoje", que abre a lista de medicamentos. -->
+        <activity
+            android:name=".home.HomeActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".history.HistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".history.StatsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".reminder.DoseConfirmationActivity"
+            android:exported="false"
+            android:launchMode="singleTop" />
+
+        <receiver
+            android:name=".reminder.ReminderReceiver"
+            android:exported="false" />
+        <receiver
+            android:name=".reminder.DoseActionReceiver"
+            android:exported="false" />
+        <receiver
+            android:name=".reminder.BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

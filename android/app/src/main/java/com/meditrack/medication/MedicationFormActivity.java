@@ -187,7 +187,7 @@ public class MedicationFormActivity extends Activity {
         saveButton.setEnabled(false);
         saveButton.setText("Salvando…");
         repository.save(medicationId, medication.toRequestJson(), new MedicationRepository.Callback<>() {
-            @Override public void onSuccess(Medication result) { setResult(RESULT_OK, new Intent()); finish(); }
+            @Override public void onSuccess(Medication result) { com.meditrack.reminder.ReminderManager.schedule(MedicationFormActivity.this, result); setResult(RESULT_OK, new Intent()); finish(); }
             @Override public void onError(String message) { saveButton.setEnabled(true); saveButton.setText("Salvar medicamento"); showError(message); }
         });
     }

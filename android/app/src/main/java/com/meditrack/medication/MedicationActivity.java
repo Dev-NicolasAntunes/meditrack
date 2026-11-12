@@ -99,6 +99,7 @@ public class MedicationActivity extends Activity {
                 .setPositiveButton("Excluir", (dialog, which) -> repository.delete(
                         medication.getId(), new MedicationRepository.Callback<Void>() {
                             @Override public void onSuccess(Void result) {
+                                com.meditrack.reminder.ReminderManager.cancel(MedicationActivity.this, medication.getId());
                                 MedicationUi.toast(MedicationActivity.this, "Medicamento excluído.");
                                 refreshMedications();
                             }
@@ -117,6 +118,7 @@ public class MedicationActivity extends Activity {
             public void onSuccess(List<Medication> medications) {
                 progress.setVisibility(View.GONE);
                 adapter.replaceAll(medications);
+                com.meditrack.reminder.ReminderManager.syncAll(MedicationActivity.this, medications);
                 emptyMessage.setVisibility(medications.isEmpty() ? View.VISIBLE : View.GONE);
                 int lowStockCount = 0;
                 for (Medication medication : medications) {
