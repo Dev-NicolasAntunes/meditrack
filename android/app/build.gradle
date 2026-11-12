@@ -1,3 +1,4 @@
+// AI assistance: ChatGPT (OpenAI) assisted with implementation; reviewed and adapted by Nicolas.
 plugins {
     id 'com.android.application'
 }

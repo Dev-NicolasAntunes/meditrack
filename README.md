@@ -165,4 +165,4 @@ Dates use `yyyy-MM-dd` and times use `HH:mm`. The low-stock warning appears in t
 ## AI usage
 
 - **Integrante 2 (Dimitri):** Claude (Anthropic) was used as an assistant while implementing the reminders, notifications, history and statistics, and while writing this README. Every file written with its help says so in a comment on its first line. All code was reviewed, tested and adapted by Dimitri.
-- **Integrante 1 (Nicolas):** _to be completed by Nicolas._
+- **Integrante 1 (Nicolas):** ChatGPT (OpenAI) assisted with the medication and stock module, including the Android form and screens, input validation, Java/Spring Boot API and SQLite persistence, JDK 26 project configuration, debugging, and this README update. Nicolas reviewed, tested, and adapted the generated changes.
