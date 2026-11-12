@@ -46,6 +46,20 @@ public class HistoryRepository {
         execute(() -> apiClient.stats(period, reference), callback);
     }
 
+    /** Histórico de um período qualquer (atual ou passado). */
+    public void findByPeriod(HistoryPeriod period, MedicationRepository.Callback<List<MedicationHistory>> callback) {
+        String type = period.getType();
+        String reference = period.reference();
+        execute(() -> apiClient.findByPeriod(type, reference), callback);
+    }
+
+    /** Estatísticas de um período qualquer (atual ou passado). */
+    public void stats(HistoryPeriod period, MedicationRepository.Callback<HistoryStats> callback) {
+        String type = period.getType();
+        String reference = period.reference();
+        execute(() -> apiClient.stats(type, reference), callback);
+    }
+
     private <T> void execute(Request<T> request, MedicationRepository.Callback<T> callback) {
         IO.execute(() -> {
             try {

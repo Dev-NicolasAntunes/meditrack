@@ -16,24 +16,27 @@ import com.meditrack.medication.MedicationUi;
 /** Percentual de adesão e quantidade de doses por status no período escolhido. */
 public class StatsActivity extends Activity {
     public static final String EXTRA_PERIOD = "com.meditrack.history.PERIOD";
+    /** Data (AAAA-MM-DD) dentro do período a exibir; sem ela, mostra o período atual. */
+    public static final String EXTRA_REFERENCE = "com.meditrack.history.REFERENCE";
 
     private final HistoryRepository repository = new HistoryRepository();
-    private String period;
+    private HistoryPeriod period;
     private LinearLayout content;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTitle("Estatísticas");
-        period = getIntent().getStringExtra(EXTRA_PERIOD);
-        if (period == null) {
-            period = HistoryRepository.PERIOD_WEEK;
+        String type = getIntent().getStringExtra(EXTRA_PERIOD);
+        if (type == null) {
+            type = HistoryRepository.PERIOD_WEEK;
         }
+        period = HistoryPeriod.of(type, getIntent().getStringExtra(EXTRA_REFERENCE));
 
         LinearLayout root = MedicationUi.vertical(this);
         root.addView(MedicationUi.heading(this, "Estatísticas"));
-        root.addView(HistoryUi.periodSelector(this, period, selected -> {
-            period = selected;
+        root.addView(HistoryUi.periodSelector(this, period.getType(), selected -> {
+            period = period.withType(selected);
             load();
         }), MedicationUi.fullWidth(this, 14));
 
@@ -57,17 +60,20 @@ public class StatsActivity extends Activity {
     private void load() {
         content.removeAllViews();
         content.addView(MedicationUi.body(this, "Carregando…"));
-        String requested = period;
+        HistoryPeriod requested = period;
         repository.stats(requested, new MedicationRepository.Callback<HistoryStats>() {
             @Override
             public void onSuccess(HistoryStats stats) {
-                if (requested.equals(period)) {
+                if (requested == period) {
                     render(stats);
                 }
             }
 
             @Override
             public void onError(String message) {
+                if (requested != period) {
+                    return;
+                }
                 content.removeAllViews();
                 content.addView(MedicationUi.body(StatsActivity.this,
                         "Não foi possível carregar as estatísticas. " + message));
@@ -79,7 +85,7 @@ public class StatsActivity extends Activity {
         content.removeAllViews();
         TextView range = MedicationUi.body(this, stats.startDate.equals(stats.endDate)
                 ? "Período: " + formatDate(stats.startDate)
-                : "Período: " + formatDate(stats.startDate) + " a " + formatDate(stats.endDate));
+                : "Período: " + formatDate(stats.startDate) + " – " + formatDate(stats.endDate));
         range.setTextSize(14);
         content.addView(range);
 

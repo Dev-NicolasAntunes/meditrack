@@ -16,10 +16,14 @@ import com.meditrack.medication.MedicationUi;
 
 import java.util.List;
 
-/** Histórico de uso com filtro por dia, semana e mês (pelo horário previsto da dose). */
+/**
+ * Histórico de uso com filtro por dia, semana e mês (pelo horário previsto da dose)
+ * e navegação para os períodos anteriores.
+ */
 public class HistoryActivity extends Activity {
     private final HistoryRepository repository = new HistoryRepository();
-    private String period = HistoryRepository.PERIOD_DAY;
+    private HistoryPeriod period = HistoryPeriod.current(HistoryRepository.PERIOD_DAY);
+    private HistoryUi.PeriodNavigator navigator;
     private LinearLayout list;
     private TextView summary;
 
@@ -34,15 +38,27 @@ public class HistoryActivity extends Activity {
         subtitle.setTextSize(14);
         root.addView(subtitle, MedicationUi.fullWidth(this, 6));
 
-        root.addView(HistoryUi.periodSelector(this, period, selected -> {
-            period = selected;
+        root.addView(HistoryUi.periodSelector(this, period.getType(), selected -> {
+            period = period.withType(selected);
             load();
         }), MedicationUi.fullWidth(this, 14));
 
+        navigator = HistoryUi.periodNavigator(this,
+                () -> {
+                    period = period.previous();
+                    load();
+                },
+                () -> {
+                    period = period.next();
+                    load();
+                });
+        root.addView(navigator.view, MedicationUi.fullWidth(this, 4));
+
         Button stats = MedicationUi.button(this, "Ver estatísticas do período");
         root.addView(stats, MedicationUi.fullWidth(this, 4));
-        stats.setOnClickListener(view -> startActivity(
-                new Intent(this, StatsActivity.class).putExtra(StatsActivity.EXTRA_PERIOD, period)));
+        stats.setOnClickListener(view -> startActivity(new Intent(this, StatsActivity.class)
+                .putExtra(StatsActivity.EXTRA_PERIOD, period.getType())
+                .putExtra(StatsActivity.EXTRA_REFERENCE, period.getAnchor())));
 
         summary = MedicationUi.body(this, "");
         summary.setTextSize(14);
@@ -66,13 +82,14 @@ public class HistoryActivity extends Activity {
     }
 
     private void load() {
+        navigator.show(period);
         summary.setText("Carregando…");
         list.removeAllViews();
-        String requested = period;
+        HistoryPeriod requested = period;
         repository.findByPeriod(requested, new MedicationRepository.Callback<List<MedicationHistory>>() {
             @Override
             public void onSuccess(List<MedicationHistory> entries) {
-                if (!requested.equals(period)) {
+                if (requested != period) {
                     return;
                 }
                 render(entries);
@@ -80,6 +97,9 @@ public class HistoryActivity extends Activity {
 
             @Override
             public void onError(String message) {
+                if (requested != period) {
+                    return;
+                }
                 summary.setText("Não foi possível carregar o histórico. " + message);
             }
         });

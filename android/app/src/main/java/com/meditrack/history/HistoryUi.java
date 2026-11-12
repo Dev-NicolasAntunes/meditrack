@@ -4,6 +4,7 @@ package com.meditrack.history;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.view.Gravity;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -46,6 +47,45 @@ public final class HistoryUi {
         }
         highlight(buttons, initial);
         return row;
+    }
+
+    /** Linha "◀ Anterior | intervalo | Próximo ▶" para trocar o período exibido. */
+    public static final class PeriodNavigator {
+        public final LinearLayout view;
+        private final Button previous;
+        private final Button next;
+        private final TextView range;
+
+        private PeriodNavigator(Context context, Runnable onPrevious, Runnable onNext) {
+            view = new LinearLayout(context);
+            view.setOrientation(LinearLayout.HORIZONTAL);
+            view.setGravity(Gravity.CENTER_VERTICAL);
+            previous = MedicationUi.button(context, "◀ Anterior");
+            next = MedicationUi.button(context, "Próximo ▶");
+            range = MedicationUi.body(context, "");
+            range.setGravity(Gravity.CENTER);
+            range.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+            range.setTextSize(15);
+            previous.setOnClickListener(v -> onPrevious.run());
+            next.setOnClickListener(v -> onNext.run());
+            LinearLayout.LayoutParams side = new LinearLayout.LayoutParams(0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT, 1);
+            view.addView(previous, side);
+            view.addView(range, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+            view.addView(next, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+        }
+
+        /** Mostra o intervalo e desabilita o "Próximo" no período atual. */
+        public void show(HistoryPeriod period) {
+            range.setText(period.label());
+            boolean enabled = period.hasNext();
+            next.setEnabled(enabled);
+            next.setAlpha(enabled ? 1f : 0.4f);
+        }
+    }
+
+    public static PeriodNavigator periodNavigator(Context context, Runnable onPrevious, Runnable onNext) {
+        return new PeriodNavigator(context, onPrevious, onNext);
     }
 
     private static void highlight(Button[] buttons, String selected) {
